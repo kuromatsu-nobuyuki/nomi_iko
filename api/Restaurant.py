@@ -65,6 +65,19 @@ def send_restaurants(rests=None):
 
     return None
 
+
+def is_str(data=None):
+    """
+    check data's type is str
+    :param data:
+    :return:
+    """
+    if isinstance(data, str) or isinstance(data, unicode):
+        return True
+    else:
+        return False
+
+
 class Restaurant():
     id = ''
     update_date = None
@@ -159,9 +172,9 @@ class Restaurant():
             self.tel = data['tel'].encode('utf-8')
         # tel_sub
         # fax
-        if len(data['opentime']) != 0:
+        if 'opentime' in data and is_str(data['opentime']):
             self.opentime = data['opentime'].encode('utf-8')
-        if len(data['holiday']) != 0:
+        if 'holiday' in data and is_str(data['holiday']):
             self.holiday = data['holiday'].encode('utf-8')
         access = data['access']
         if len(access['line']) != 0:
