@@ -88,7 +88,11 @@ if __name__ == '__main__':
                         hit_per_page = int(response_json['hit_per_page'])
                         page_offset = int(response_json['page_offset'])
 
-                except:
+                except Exception as e:
+                    print("type:{0}".format(type(e)))
+                    print("args:{0}".format(e.args))
+                    print("message:{0}".format(e.message))
+                    print("{0}".format(e))
                     print "Cant't get Restaurants"
                 #check updated restaurants in a day
                 updated_rets = Restaurant.updated_in_days(rests=rests, day=1, now=now)

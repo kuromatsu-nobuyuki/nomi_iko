@@ -21,7 +21,11 @@ def request_grinavi_restrants(hit_per_page=50, offset_page=1):
     response = None
     try:
         response = requests.get(SITE_URL, params=param)
-    except:
+    except Exception as e:
+        print("type:{0}".format(type(e)))
+        print("args:{0}".format(e.args))
+        print("message:{0}".format(e.message))
+        print("{0}".format(e))
         print "fail to get Restaurants."
     return response
 
