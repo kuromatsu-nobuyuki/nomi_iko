@@ -58,7 +58,13 @@ def send_restaurants(rests=None):
 
     if len(rests) > 0:
         for r in rests:
-            body += '|[' + r.name + '](' + r.url + ')|' + r.address + '|¥n'
+            record = '|[' + r.name + '](' + r.url + ')|' + r.address + '|¥n'
+            if len(header) + len(body) + len(record) > 4000:
+                # mattermost can't get over 4000 character
+                json_payload = make_json_pay_load(message=header + body)
+                send_message(json=json_payload)
+                body = ''
+            body += record
         # send table to mattermost
         json_payload = make_json_pay_load(message=header+body)
         send_message(json=json_payload)
