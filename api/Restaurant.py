@@ -42,7 +42,7 @@ def parse_response(response=None):
 def updated_in_days(rests=None, day=1, now=None):
     updated_rests = []
     for r in rests:
-        if now - r.update_data < datetime.timedelta(days=day):
+        if now - r.update_date < datetime.timedelta(days=day):
             updated_rests.append(r)
 
     return updated_rests
