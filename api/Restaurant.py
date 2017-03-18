@@ -159,8 +159,10 @@ class Restaurant():
             self.tel = data['tel'].encode('utf-8')
         # tel_sub
         # fax
-        self.opentime = data['opentime'].encode('utf-8')
-        self.holiday = data['holiday'].encode('utf-8')
+        if len(data['opentime']) != 0:
+            self.opentime = data['opentime'].encode('utf-8')
+        if len(data['holiday']) != 0:
+            self.holiday = data['holiday'].encode('utf-8')
         access = data['access']
         if len(access['line']) != 0:
             self.access['line'] = access['line'].encode('utf-8')
