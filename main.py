@@ -47,12 +47,6 @@ def make_json_pay_load(message, token):
 
 
 if __name__ == '__main__':
-    f = open("./test_result")
-    result = json.load(f)
-    f.close()
-    # response = result['garea_small']
-
-
     """
     loop
     get reestraunts information 11:00AM
