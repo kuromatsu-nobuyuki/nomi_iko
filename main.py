@@ -96,10 +96,10 @@ if __name__ == '__main__':
                 updated_rets = Restaurant.updated_in_days(rests=rests, day=1, now=now)
 
                 # send to mattermost
-                json_payload = Restaurant.send_restaurants(rests=updated_rets)
+                Restaurant.send_restaurants(rests=updated_rets)
 
                 # set a flag
-                already_get_11am = True
+                get_updated_rests = True
         # reset flag
         if n_hour == 0 and get_updated_rests:
             get_updated_rests = False
