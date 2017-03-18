@@ -3,20 +3,27 @@ import requests
 import json
 import sys
 from datetime import datetime as dt
+import datetime
 from user import USER_KEY
+from mattermost import make_json_pay_load, send_message
 
 SITE_URL='http://api.gnavi.co.jp/RestSearchAPI/20150630/'
 
 
-def request_grinavi_restrants():
+def request_grinavi_restrants(hit_per_page=50, offset_page=1):
     param = {
         'keyid': USER_KEY,
         'format': 'json',
-        'areacode_s': 'AREAS2310'  # AREAS2310:武蔵小杉・元住吉
+        'areacode_s': 'AREAS2310',  # AREAS2310:武蔵小杉・元住吉
+        'offset_page': offset_page,
+        'hit_per_page': hit_per_page
     }
-    response = requests.get(SITE_URL, params=param)
-    response_json = response.json()
-    return response_json
+    response = None
+    try:
+        response = requests.get(SITE_URL, params=param)
+    except:
+        print "fail to get Restaurants."
+    return response
 
 def parse_response(response=None):
     """
@@ -24,7 +31,6 @@ def parse_response(response=None):
     :param data: json format response returned by griunavi web api
     :return: Restaurants list
     """
-    total_hit_count = response['total_hit_count']
     restaurants = response['rest']
     rest_list = []
     for i in restaurants:
@@ -32,9 +38,28 @@ def parse_response(response=None):
         rest_list.append(r)
     return rest_list
 
-def get_near_rests(area_name=None):
-    area_code = None
 
+def updated_in_days(rests=None, day=1, now=None):
+    updated_rests = []
+    for r in rests:
+        if now - r.update_data < datetime.timedelta(days=day):
+            updated_rests.append(r)
+
+    return updated_rests
+
+def send_restaurants(rests=None):
+
+    header = '|店名|住所|¥n|---|---|¥n'
+    body = ''
+
+    if len(rests) > 0:
+        for r in rests:
+            body += '|[' + r.name + '](' + r.url + ')|' + r.address + '|¥n'
+        # send table to mattermost
+        json_payload = make_json_pay_load(message=header+body)
+        send_message(json=json_payload)
+
+    return None
 
 class Restaurant():
     id = ''

@@ -1,8 +1,9 @@
 # coding: utf-8
-import requests
 import json
 from api import Restaurant
-from user import USER_KEY
+from datetime import datetime
+import time
+
 
 """
 AREAL2322:横浜・東神奈川  PREF14:神奈川県
@@ -32,12 +33,81 @@ AREAS2398:白楽・反町
 AREAS2354:新横浜
 """
 
-if __name__ == '__main__':
-    response = Restaurant.request_grinavi_restrants()
-    rests = Restaurant.parse_response(response=response)
-    for i in rests:
-        info = i.get_short_info()
-        print '%s(%s): %s¥n%s¥n%s' % (info['name'], info['url'], info['pr_short'], info['address'], info['tel'])
 
+def make_json_pay_load(message, token):
+    payload = {
+        'response_type': "in_channel",
+        'text': str(message),
+        'MATTERMOST_TOKEN': token
+    }
+    json_payload = json.dumps(payload)
+    return json_payload
+
+
+
+
+if __name__ == '__main__':
+    f = open("./test_result")
+    result = json.load(f)
+    f.close()
+    # response = result['garea_small']
+
+
+    """
+    loop
+    get reestraunts information 11:00AM
+    """
+    CHECK_HOUR = 11
+    get_updated_rests = False
+    while True:
+        now = datetime.now()
+        n_hour = now.hour
+        n_month = now.month
+        n_day = now.day
+        # get new restrants in Kosugi at 11 AM
+        if n_hour == CHECK_HOUR:
+            if not get_updated_rests:
+                rests = []
+                # get restaurants
+                try:
+                    response = Restaurant.request_grinavi_restrants()
+                    response_json = response.json()
+                    rests += Restaurant.parse_response(response=response_json)
+
+                    total_hit_count = int(response_json['total_hit_count'])
+                    hit_per_page = 50
+                    page_offset = int(response_json['page_offset'])
+
+                    offset_page = 1
+
+                    while total_hit_count - (hit_per_page * page_offset) > 0:
+                        # request next page
+                        offset_page += 1
+                        print "Send Request pages(" + str(offset_page) + ")"
+                        response = Restaurant.request_grinavi_restrants(hit_per_page=hit_per_page,
+                                                                        offset_page=offset_page)
+                        response_json = response.json()
+                        rests += Restaurant.parse_response(response=response_json)
+
+                        # update page offset
+                        total_hit_count = int(response_json['total_hit_count'])
+                        hit_per_page = int(response_json['hit_per_page'])
+                        page_offset = int(response_json['page_offset'])
+
+                except:
+                    print "Cant't get Restaurants"
+                #check updated restaurants in a day
+                updated_rets = Restaurant.updated_in_days(rests=rests, day=1, now=now)
+
+                # send to mattermost
+                json_payload = Restaurant.send_restaurants(rests=updated_rets)
+
+                # set a flag
+                already_get_11am = True
+        # reset flag
+        if n_hour == 0 and get_updated_rests:
+            get_updated_rests = False
+
+        time.sleep(10)
 
 
