@@ -72,14 +72,12 @@ if __name__ == '__main__':
                     hit_per_page = 50
                     page_offset = int(response_json['page_offset'])
 
-                    offset_page = 1
-
                     while total_hit_count - (hit_per_page * page_offset) > 0:
                         # request next page
-                        offset_page += 1
-                        print "Send Request pages(" + str(offset_page) + ")"
+                        page_offset += 1
+                        print "Send Request pages(" + str(page_offset) + ")"
                         response = Restaurant.request_grinavi_restrants(hit_per_page=hit_per_page,
-                                                                        offset_page=offset_page)
+                                                                        offset_page=page_offset)
                         response_json = response.json()
                         rests += Restaurant.parse_response(response=response_json)
 
