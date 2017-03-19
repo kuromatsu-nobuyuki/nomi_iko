@@ -51,6 +51,9 @@ def make_json_pay_load(message, token):
 
 
 if __name__ == '__main__':
+    # First time, read Restaurants data if there is the file.
+    Restaurant.read_known_restaurants()
+
     """
     loop
     get reestraunts information 11:00AM
@@ -96,11 +99,16 @@ if __name__ == '__main__':
                     print("message:{0}".format(e.message))
                     print("{0}".format(e))
                     print "Cant't get Restaurants"
-                #check updated restaurants in a day
+                # check updated restaurants in a day
                 updated_rets = Restaurant.updated_in_days(rests=rests, day=1, now=now)
 
+                # check there is new Restaurants
+                unknown_rests = Restaurant.get_unknown_restaurants(rests=rests)
+                # update known Restaurants
+                Restaurant.update_knwon_restaurants(unknwon_rests=unknown_rests)
+
                 # send to mattermost
-                Restaurant.send_restaurants(rests=updated_rets)
+                Restaurant.send_restaurants(rests=unknown_rests)
 
                 # set a flag
                 get_updated_rests = True
