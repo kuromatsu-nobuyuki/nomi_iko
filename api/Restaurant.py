@@ -2,12 +2,16 @@
 import requests
 import json
 import sys
+import os
+import shutil
 from datetime import datetime as dt
 import datetime
 from user import USER_KEY
 from mattermost import make_json_pay_load, send_message
 
 SITE_URL='http://api.gnavi.co.jp/RestSearchAPI/20150630/'
+known_restaurants = []
+CSV_PATH = '/root/data/rests.csv'
 
 
 def request_grinavi_restrants(hit_per_page=50, offset_page=1):
@@ -70,6 +74,53 @@ def send_restaurants(rests=None):
         send_message(json=json_payload)
 
     return None
+
+
+def write_known_restaurants():
+    try:
+        # write Restaurant as tmp file
+        tmp_filepath = CSV_PATH + '.tmp'
+        f = open(tmp_filepath, 'w')
+        for rest_id in known_restaurants:
+            f.write(str(rest_id) + '¥n')
+        f.close()
+        # copy tmpfile to Restaurants file
+        shutil.copy2(tmp_filepath, CSV_PATH)
+    except Exception as e:
+        print("type:{0}".format(type(e)))
+        print("args:{0}".format(e.args))
+        print("message:{0}".format(e.message))
+        print("{0}".format(e))
+        print "Failed to save Restaurants to %s" % CSV_PATH
+    return
+
+
+def read_known_restaurants():
+    if not os.path.exists(CSV_PATH):
+        print "There is no Restaurant in %s" % CSV_PATH
+        return
+    try:
+        f = open(CSV_PATH, 'r')
+        lines = f.readlinea()
+        f.close()
+
+        # delete old known Restaurants
+        known_restaurants = []
+
+        # update Restaurants list
+        for line in lines:
+            known_restaurants.append(str.strip(line))
+
+    except Exception as e:
+        print("type:{0}".format(type(e)))
+        print("args:{0}".format(e.args))
+        print("message:{0}".format(e.message))
+        print("{0}".format(e))
+        print "Failed to read Restaurants in %s" % CSV_PATH
+        sys.exit(1)
+
+    return
+
 
 
 def is_str(data=None):

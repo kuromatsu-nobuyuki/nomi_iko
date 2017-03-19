@@ -35,6 +35,7 @@ AREAS2354:新横浜
 
 
 
+
 def make_json_pay_load(message, token):
     payload = {
         'response_type': 'in_channel',
