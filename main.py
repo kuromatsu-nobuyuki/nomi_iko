@@ -34,8 +34,6 @@ AREAS2354:新横浜
 """
 
 
-
-
 def make_json_pay_load(message, token):
     payload = {
         'response_type': 'in_channel',
@@ -48,15 +46,17 @@ def make_json_pay_load(message, token):
     return json_payload
 
 
-
+# list of Restaurant.id
+known_restaurants = []
 
 if __name__ == '__main__':
     # set area
     check_area_s = 'AREAS2310'
 
     # First time, read Restaurants data if there is the file.
-    can_read_file = Restaurant.read_known_restaurants()
-    if not can_read_file:
+    read_rests = Restaurant.read_known_restaurants()
+    if len(read_rests) > 0:
+        known_restaurants = read_rests
         # update known Restaurants from grunavi's database
         rests = Restaurant.request_all_restrants(area_s=check_area_s)
         Restaurant.update_knwon_restaurants(unknwon_rests=rests)

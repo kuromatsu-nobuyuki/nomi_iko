@@ -7,11 +7,10 @@ import shutil
 from datetime import datetime as dt
 import datetime
 from user import USER_KEY
+from main import known_restaurants
 from mattermost import make_json_pay_load, send_message
 
 SITE_URL='http://api.gnavi.co.jp/RestSearchAPI/20150630/'
-# list of Restaurant.id
-known_restaurants = []
 CSV_PATH = '/root/data/rests.csv'
 
 
@@ -34,10 +33,11 @@ def request_grinavi_restrants(hit_per_page=50, offset_page=1, areacode_s='AREAS2
         print "fail to get Restaurants."
     return response
 
+
 def parse_response(response=None):
     """
 
-    :param data: json format response returned by griunavi web api
+    :param response: json format response returned by griunavi web api
     :return: Restaurants list
     """
     restaurants = response['rest']
@@ -71,7 +71,8 @@ def request_all_restrants(area_s=None):
             page_offset += 1
             print "Send Request pages(" + str(page_offset) + ")"
             response = request_grinavi_restrants(hit_per_page=hit_per_page,
-                                                            offset_page=page_offset)
+                                                 offset_page=page_offset,
+                                                 areacode_s=area_s)
             response_json = response.json()
             rests += parse_response(response=response_json)
 
@@ -96,6 +97,7 @@ def updated_in_days(rests=None, day=1, now=None):
             updated_rests.append(r)
 
     return updated_rests
+
 
 def send_restaurants(rests=None):
 
@@ -126,9 +128,10 @@ def get_unknown_restaurants(rests=None):
     """
     unknown_restaurants = []
     for rest in rests:
-        if not rest.id in known_restaurants:
+        if rest.id not in known_restaurants:
             unknown_restaurants.append(rest)
     return unknown_restaurants
+
 
 def update_knwon_restaurants(unknwon_rests=None):
     """
@@ -165,25 +168,23 @@ def write_known_restaurants():
 def read_known_restaurants():
     """
     read Restaurant file fron local disk.
-    :return: True: read file, False: there is no file.
+    :return: list of Restaurant id.
     """
     if not os.path.exists(CSV_PATH):
         print "There is no Restaurant in %s" % CSV_PATH
         return False
+
+    read_restaurants = []
     try:
         f = open(CSV_PATH, 'r')
         lines = f.readlines()
         f.close()
 
-        # delete old known Restaurants
-        known_restaurants = []
-
         # update Restaurants list
         for line in lines:
             rest_id = str.strip(line)
             if rest_id != '':
-                known_restaurants.append(str.strip(line))
-
+                read_restaurants.append(str.strip(line))
     except Exception as e:
         print("type:{0}".format(type(e)))
         print("args:{0}".format(e.args))
@@ -192,8 +193,7 @@ def read_known_restaurants():
         print "Failed to read Restaurants in %s" % CSV_PATH
         sys.exit(1)
 
-    return True
-
+    return read_restaurants
 
 
 def is_str(data=None):
