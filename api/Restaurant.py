@@ -10,6 +10,7 @@ from user import USER_KEY
 from mattermost import make_json_pay_load, send_message
 
 SITE_URL='http://api.gnavi.co.jp/RestSearchAPI/20150630/'
+# list of Restaurant.id
 known_restaurants = []
 CSV_PATH = '/root/data/rests.csv'
 
@@ -132,11 +133,12 @@ def get_unknown_restaurants(rests=None):
 def update_knwon_restaurants(unknwon_rests=None):
     """
     update knwon restaurant list and save to file.
-    :param unknwon_rests:
+    :param unknwon_rests: list of Restaurant Class
     :return:
     """
     if len(unknwon_rests) > 0:
-        known_restaurants.append(unknwon_rests)
+        for rest in unknwon_rests:
+            known_restaurants.append(str(rest.id))
     write_known_restaurants()
     return
 
@@ -147,7 +149,7 @@ def write_known_restaurants():
         tmp_filepath = CSV_PATH + '.tmp'
         f = open(tmp_filepath, 'w')
         for rest_id in known_restaurants:
-            f.write(str(rest_id) + '¥n')
+            f.write(rest_id + '¥n')
         f.close()
         # copy tmpfile to Restaurants file
         shutil.copy2(tmp_filepath, CSV_PATH)
@@ -178,7 +180,9 @@ def read_known_restaurants():
 
         # update Restaurants list
         for line in lines:
-            known_restaurants.append(str.strip(line))
+            rest_id = str.strip(line)
+            if rest_id != '':
+                known_restaurants.append(str.strip(line))
 
     except Exception as e:
         print("type:{0}".format(type(e)))
