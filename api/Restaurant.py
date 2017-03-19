@@ -85,7 +85,7 @@ def request_all_restrants(area_s=None):
         print("message:{0}".format(e.message))
         print("{0}".format(e))
         print "Cant't get Restaurants"
-    return
+    return rests
 
 
 def updated_in_days(rests=None, day=1, now=None):
