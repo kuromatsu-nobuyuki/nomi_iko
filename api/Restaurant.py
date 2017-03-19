@@ -98,12 +98,12 @@ def updated_in_days(rests=None, day=1, now=None):
 
 def send_restaurants(rests=None):
 
-    header = '|店名|住所|¥n|---|---|¥n'
+    header = '|店名|住所|\n|---|---|\n'
     body = ''
 
     if len(rests) > 0:
         for r in rests:
-            record = '|[' + r.name + '](' + r.url + ')|' + r.address + '|¥n'
+            record = '|[' + r.name + '](' + r.url + ')|' + r.address + '|\n'
             if len(header) + len(body) + len(record) > 4000:
                 # mattermost can't get over 4000 character
                 json_payload = make_json_pay_load(message=header + body)
