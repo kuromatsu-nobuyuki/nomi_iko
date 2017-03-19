@@ -125,7 +125,7 @@ def read_known_restaurants():
         return
     try:
         f = open(CSV_PATH, 'r')
-        lines = f.readlinea()
+        lines = f.readlines()
         f.close()
 
         # delete old known Restaurants
