@@ -51,8 +51,15 @@ def make_json_pay_load(message, token):
 
 
 if __name__ == '__main__':
+    # set area
+    check_area_s = 'AREAS2310'
+
     # First time, read Restaurants data if there is the file.
-    Restaurant.read_known_restaurants()
+    can_read_file = Restaurant.read_known_restaurants()
+    if not can_read_file:
+        # update known Restaurants from grunavi's database
+        rests = Restaurant.request_all_restrants(area_s=check_area_s)
+        Restaurant.update_knwon_restaurants(unknwon_rests=rests)
 
     """
     loop
@@ -68,37 +75,8 @@ if __name__ == '__main__':
         # get new restrants in Kosugi at 11 AM
         if n_hour == CHECK_HOUR:
             if not get_updated_rests:
-                rests = []
-                # get restaurants
-                try:
-                    response = Restaurant.request_grinavi_restrants()
-                    response_json = response.json()
-                    rests += Restaurant.parse_response(response=response_json)
-
-                    total_hit_count = int(response_json['total_hit_count'])
-                    hit_per_page = 50
-                    page_offset = int(response_json['page_offset'])
-
-                    while total_hit_count - (hit_per_page * page_offset) > 0:
-                        # request next page
-                        page_offset += 1
-                        print "Send Request pages(" + str(page_offset) + ")"
-                        response = Restaurant.request_grinavi_restrants(hit_per_page=hit_per_page,
-                                                                        offset_page=page_offset)
-                        response_json = response.json()
-                        rests += Restaurant.parse_response(response=response_json)
-
-                        # update page offset
-                        total_hit_count = int(response_json['total_hit_count'])
-                        hit_per_page = int(response_json['hit_per_page'])
-                        page_offset = int(response_json['page_offset'])
-
-                except Exception as e:
-                    print("type:{0}".format(type(e)))
-                    print("args:{0}".format(e.args))
-                    print("message:{0}".format(e.message))
-                    print("{0}".format(e))
-                    print "Cant't get Restaurants"
+                # request all restaurant in musashi-kosugi, motosumiyoshi
+                rests = Restaurant.request_all_restrants(area_s=check_area_s)
                 # check updated restaurants in a day
                 updated_rets = Restaurant.updated_in_days(rests=rests, day=1, now=now)
 

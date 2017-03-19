@@ -14,11 +14,11 @@ known_restaurants = []
 CSV_PATH = '/root/data/rests.csv'
 
 
-def request_grinavi_restrants(hit_per_page=50, offset_page=1):
+def request_grinavi_restrants(hit_per_page=50, offset_page=1, areacode_s='AREAS2310'):
     param = {
         'keyid': USER_KEY,
         'format': 'json',
-        'areacode_s': 'AREAS2310',  # AREAS2310:武蔵小杉・元住吉
+        'areacode_s': areacode_s,  # AREAS2310:武蔵小杉・元住吉
         'offset_page': offset_page,
         'hit_per_page': hit_per_page
     }
@@ -45,6 +45,47 @@ def parse_response(response=None):
         r = Restaurant(data=i)
         rest_list.append(r)
     return rest_list
+
+
+def request_all_restrants(area_s=None):
+    """
+    get all restaurants in area_S
+    :param area_s: area_name
+    :return: list of Restaurant Class
+    """
+    HIT_PER_PAGE = 50
+    rests = []
+    # get restaurants
+    try:
+        response = request_grinavi_restrants()
+        response_json = response.json()
+        rests += parse_response(response=response_json)
+
+        total_hit_count = int(response_json['total_hit_count'])
+        hit_per_page = HIT_PER_PAGE
+        page_offset = int(response_json['page_offset'])
+
+        while total_hit_count - (hit_per_page * page_offset) > 0:
+            # request next page
+            page_offset += 1
+            print "Send Request pages(" + str(page_offset) + ")"
+            response = request_grinavi_restrants(hit_per_page=hit_per_page,
+                                                            offset_page=page_offset)
+            response_json = response.json()
+            rests += parse_response(response=response_json)
+
+            # update page offset
+            total_hit_count = int(response_json['total_hit_count'])
+            hit_per_page = int(response_json['hit_per_page'])
+            page_offset = int(response_json['page_offset'])
+
+    except Exception as e:
+        print("type:{0}".format(type(e)))
+        print("args:{0}".format(e.args))
+        print("message:{0}".format(e.message))
+        print("{0}".format(e))
+        print "Cant't get Restaurants"
+    return
 
 
 def updated_in_days(rests=None, day=1, now=None):
@@ -120,9 +161,13 @@ def write_known_restaurants():
 
 
 def read_known_restaurants():
+    """
+    read Restaurant file fron local disk.
+    :return: True: read file, False: there is no file.
+    """
     if not os.path.exists(CSV_PATH):
         print "There is no Restaurant in %s" % CSV_PATH
-        return
+        return False
     try:
         f = open(CSV_PATH, 'r')
         lines = f.readlines()
@@ -143,7 +188,7 @@ def read_known_restaurants():
         print "Failed to read Restaurants in %s" % CSV_PATH
         sys.exit(1)
 
-    return
+    return True
 
 
 
