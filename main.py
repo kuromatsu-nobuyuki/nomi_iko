@@ -34,11 +34,14 @@ AREAS2354:新横浜
 """
 
 
+
 def make_json_pay_load(message, token):
     payload = {
-        'response_type': "in_channel",
+        'response_type': 'in_channel',
         'text': str(message),
-        'MATTERMOST_TOKEN': token
+        'MATTERMOST_TOKEN': token,
+        #'icon_url': ''
+        'username': 'nomi-iko'
     }
     json_payload = json.dumps(payload)
     return json_payload
