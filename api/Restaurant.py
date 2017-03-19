@@ -76,6 +76,30 @@ def send_restaurants(rests=None):
     return None
 
 
+def get_unknown_restaurants(rests=None):
+    """
+    return unknwon restaurants list.
+    :param rests: list of Restaurant classe
+    :return: list of Restaurant class
+    """
+    unknown_restaurants = []
+    for rest in rests:
+        if not rest.id in known_restaurants:
+            unknown_restaurants.append(rest)
+    return unknown_restaurants
+
+def update_knwon_restaurants(unknwon_rests=None):
+    """
+    update knwon restaurant list and save to file.
+    :param unknwon_rests:
+    :return:
+    """
+    if len(unknwon_rests) > 0:
+        known_restaurants.append(unknwon_rests)
+    write_known_restaurants()
+    return
+
+
 def write_known_restaurants():
     try:
         # write Restaurant as tmp file
